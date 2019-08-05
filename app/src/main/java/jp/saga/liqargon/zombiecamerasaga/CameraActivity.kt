@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Matrix
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Rational
@@ -29,7 +30,16 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
+
         viewFinder = findViewById(R.id.view_finder)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        } else {
+            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        }
 
         if (allPermissionGranted()){
             viewFinder.post { startCamera() }
@@ -48,7 +58,7 @@ class CameraActivity : AppCompatActivity() {
 
     private fun startCamera() {
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(1,1))
+//            setTargetAspectRatio(Rational(1,1))
         }.build()
 
         val preview = Preview(previewConfig)
@@ -101,4 +111,14 @@ class CameraActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    fun returnToMain(view: View) {
+        finish()
+    }
+
+    fun selectFrame(view: View) {
+        val intent = Intent(this, FrameActivity::class.java).apply {
+
+        }
+        startActivity(intent)
+    }
 }
