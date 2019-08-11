@@ -1,6 +1,7 @@
 package jp.saga.liqargon.zombiecamerasaga
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Matrix
@@ -20,6 +21,7 @@ import android.widget.Toast
 import androidx.camera.core.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
@@ -27,6 +29,7 @@ import java.util.concurrent.TimeUnit
 class CameraActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
+        private const val RESULT_FRAME_SELECT = 502
     }
 
     private val REQUESTED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
@@ -182,7 +185,7 @@ class CameraActivity : AppCompatActivity() {
         val intent = Intent(this, FrameActivity::class.java).apply {
 
         }
-        startActivity(intent)
+        startActivityForResult(intent, RESULT_FRAME_SELECT)
     }
 
     fun hoge(view: View) {
@@ -209,6 +212,18 @@ class CameraActivity : AppCompatActivity() {
                 val luma = pixels.average()
                 Log.d("CameraXApp", "Average luminosity: $luma")
                 lastAnalyzedTimestamp = currentTimestamp
+            }
+
+        }
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RESULT_FRAME_SELECT){
+            if (resultCode == Activity.RESULT_OK){
+                val rscId: Int =data?.getIntExtra("resource_id", 0)!!
+                imageView.setImageResource(rscId)
             }
 
         }
