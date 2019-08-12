@@ -4,8 +4,11 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Matrix
-import android.hardware.camera2.CameraCaptureSession
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,7 +16,6 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Rational
-import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
@@ -25,6 +27,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import android.hardware.camera2.params.StreamConfigurationMap as StreamConfigurationMap1
@@ -54,7 +58,7 @@ class CameraActivity : AppCompatActivity() {
             viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         }
 
-        if (allPermissionGranted()){
+        if (allPermissionGranted()) {
             viewFinder.post { startCamera() }
         } else {
             ActivityCompat.requestPermissions(
@@ -85,7 +89,7 @@ class CameraActivity : AppCompatActivity() {
     private fun startCamera() {
 
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(viewFinder.width,viewFinder.height))
+            setTargetAspectRatio(Rational(viewFinder.width, viewFinder.height))
         }.build()
 
         val preview = Preview(previewConfig)
@@ -127,6 +131,36 @@ class CameraActivity : AppCompatActivity() {
 
                     override fun onImageSaved(file: File) {
                         // TODO(liqargon): combine a taken picture and selected frame.
+                        val bmb: Bitmap = BitmapFactory.decodeFile(file.path)
+                        val btm: Bitmap = Bitmap.createBitmap(bmb.width, bmb.height, Bitmap.Config.ARGB_8888)
+                        val canvas = Canvas(btm)
+                        var bmf: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.sakura_2)
+
+                        // adjust a bitmap size of captured image in accordance with frame aspect ratio (16:9)
+                        val frame_height: Int = when {
+                            bmb.width / bmb.height >= 16 / 9 -> bmb.height
+                            bmb.width / bmb.height == 16 / 9 -> bmb.height
+                            bmb.width / bmb.height <= 16 / 9 -> bmb.width * 9 / 16
+                            else -> return
+                        }
+                        val frame_width: Int = when {
+                            bmb.width / bmb.height >= 16 / 9 -> bmb.height * 16 / 9
+                            bmb.width / bmb.height == 16 / 9 -> bmb.width
+                            bmb.width / bmb.height <= 16 / 9 -> bmb.width
+                            else -> return
+                        }
+                        bmf = Bitmap.createScaledBitmap(bmf, frame_width, frame_height, false)
+                        canvas.drawBitmap(bmb, 0f, 0f, null)
+                        canvas.drawBitmap(bmf, (bmb.width - frame_width) / 2f, (bmb.height - frame_height) / 2f, null)
+                        try {
+                            val out: FileOutputStream = FileOutputStream(file)
+                            btm.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                            out.flush()
+                            out.close()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                            throw e
+                        }
 //                        val intent = Intent(this, PreviewActivity::class.java).apply{
 //
 //                        }
@@ -161,7 +195,7 @@ class CameraActivity : AppCompatActivity() {
         val centerX = viewFinder.width / 2f
         val centerY = viewFinder.height / 2f
 
-        val rotationDegrees = when(viewFinder.display.rotation) {
+        val rotationDegrees = when (viewFinder.display.rotation) {
             Surface.ROTATION_0 -> 0
             Surface.ROTATION_90 -> 90
             Surface.ROTATION_180 -> 180
@@ -172,14 +206,20 @@ class CameraActivity : AppCompatActivity() {
         viewFinder.setTransform(matrix)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionGranted()) {
                 viewFinder.post { startCamera() }
             } else {
-                Toast.makeText(this,
+                Toast.makeText(
+                    this,
                     "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
@@ -230,10 +270,14 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RESULT_FRAME_SELECT){
-            if (resultCode == Activity.RESULT_OK){
-                val rscId: Int =data?.getIntExtra("resource_id", 0)!!
-                imageView.setImageResource(rscId)
+        if (requestCode == RESULT_FRAME_SELECT) {
+            if (resultCode == Activity.RESULT_OK) {
+                val rscId: Int = data?.getIntExtra("resource_id", 0)!!
+                val mat: Matrix = Matrix()
+                mat.postRotate(90f)
+                var bmp: Bitmap = BitmapFactory.decodeResource(resources, rscId)
+                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, true)
+                imageView.setImageBitmap(bmp)
             }
         }
     }
