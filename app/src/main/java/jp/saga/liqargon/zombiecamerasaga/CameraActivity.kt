@@ -21,6 +21,7 @@ import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.core.app.ActivityCompat
@@ -85,6 +86,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private lateinit var viewFinder: TextureView
+    private var rscId: Int? = null
 
     private fun startCamera() {
 
@@ -111,7 +113,7 @@ class CameraActivity : AppCompatActivity() {
             }.build()
 
         val imageCapture = ImageCapture(imageCaptureConfig)
-        findViewById<ImageButton>(R.id.capture_button).setOnClickListener {
+        findViewById<ImageView>(R.id.capture_button).setOnClickListener {
             val file = File(
                 externalMediaDirs.first(),
                 "${System.currentTimeMillis()}.jpg"
@@ -134,7 +136,6 @@ class CameraActivity : AppCompatActivity() {
                         val bmb: Bitmap = BitmapFactory.decodeFile(file.path)
                         val btm: Bitmap = Bitmap.createBitmap(bmb.width, bmb.height, Bitmap.Config.ARGB_8888)
                         val canvas = Canvas(btm)
-                        var bmf: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.sakura_2)
 
                         // adjust a bitmap size of captured image in accordance with frame aspect ratio (16:9)
                         val frame_height: Int = when {
@@ -149,9 +150,12 @@ class CameraActivity : AppCompatActivity() {
                             bmb.width / bmb.height <= 16 / 9 -> bmb.width
                             else -> return
                         }
-                        bmf = Bitmap.createScaledBitmap(bmf, frame_width, frame_height, false)
                         canvas.drawBitmap(bmb, 0f, 0f, null)
-                        canvas.drawBitmap(bmf, (bmb.width - frame_width) / 2f, (bmb.height - frame_height) / 2f, null)
+                        if (rscId != null){
+                            var bmf: Bitmap = BitmapFactory.decodeResource(resources, rscId!!)
+                            bmf = Bitmap.createScaledBitmap(bmf, frame_width, frame_height, false)
+                            canvas.drawBitmap(bmf, (bmb.width - frame_width) / 2f, (bmb.height - frame_height) / 2f, null)
+                        }
                         try {
                             val out: FileOutputStream = FileOutputStream(file)
                             btm.compress(Bitmap.CompressFormat.JPEG, 100, out)
@@ -272,10 +276,10 @@ class CameraActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RESULT_FRAME_SELECT) {
             if (resultCode == Activity.RESULT_OK) {
-                val rscId: Int = data?.getIntExtra("resource_id", 0)!!
+                rscId = data?.getIntExtra("resource_id", 0)!!
                 val mat: Matrix = Matrix()
                 mat.postRotate(90f)
-                var bmp: Bitmap = BitmapFactory.decodeResource(resources, rscId)
+                var bmp: Bitmap = BitmapFactory.decodeResource(resources, rscId!!)
                 bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, true)
                 imageView.setImageBitmap(bmp)
             }

@@ -26,34 +26,33 @@ class FrameActivity : AppCompatActivity() {
         val ides = (0..11).map { generateViewId() }
 
         for (i in 0..11) {
-
             // TODO(liqargon): 3で割れない数に対応, 横画像対応
             val params: ConstraintLayout.LayoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
-                dimensionRatio = "h,9:16"
+                dimensionRatio = "h,16:9"
                 setMargins(16)
-                when (i % 3) {
+                when (i % 2) {
                     0 -> {
                         startToStart = ConstraintLayout.LayoutParams.PARENT_ID
                         endToStart = ides[i + 1]
                         if (i == 0) {
                             topToTop = ConstraintLayout.LayoutParams.PARENT_ID
                         } else {
-                            topToBottom = ides[i - 3]
+                            topToBottom = ides[i - 2]
                         }
                     }
                     1 -> {
                         startToEnd = ides[i - 1]
-                        endToStart = ides[i + 1]
+                        endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
                         if (i == 1) {
                             topToTop = ConstraintLayout.LayoutParams.PARENT_ID
                         } else {
-                            topToBottom = ides[i - 3]
+                            topToBottom = ides[i - 2]
                         }
                     }
                     else -> {
                         startToEnd = ides[i - 1]
-                        endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-                        if (i == 2) {
+                        endToStart = ides[i + 1]
+                        if (i == 1) {
                             topToTop = ConstraintLayout.LayoutParams.PARENT_ID
                         } else {
                             topToBottom = ides[i - 3]
