@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Matrix
+import android.hardware.camera2.CameraCaptureSession
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Rational
+import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
@@ -25,6 +27,7 @@ import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
+import android.hardware.camera2.params.StreamConfigurationMap as StreamConfigurationMap1
 
 class CameraActivity : AppCompatActivity() {
     companion object {
@@ -80,8 +83,9 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var viewFinder: TextureView
 
     private fun startCamera() {
+
         val previewConfig = PreviewConfig.Builder().apply {
-//            setTargetAspectRatio(Rational(1,1))
+            setTargetAspectRatio(Rational(viewFinder.width,viewFinder.height))
         }.build()
 
         val preview = Preview(previewConfig)
@@ -95,10 +99,11 @@ class CameraActivity : AppCompatActivity() {
             updateTransform()
         }
 
+//        CameraCaptureSession.
         val imageCaptureConfig = ImageCaptureConfig.Builder()
             .apply {
-                setTargetAspectRatio(Rational(1, 1))
-                setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
+                setTargetAspectRatio(Rational(viewFinder.width, viewFinder.height))
+                setCaptureMode(ImageCapture.CaptureMode.MAX_QUALITY)
             }.build()
 
         val imageCapture = ImageCapture(imageCaptureConfig)
@@ -121,6 +126,14 @@ class CameraActivity : AppCompatActivity() {
                     }
 
                     override fun onImageSaved(file: File) {
+                        // TODO(liqargon): combine a taken picture and selected frame.
+//                        val intent = Intent(this, PreviewActivity::class.java).apply{
+//
+//                        }
+//                        val intent = Intent(this@CameraActivity, FrameActivity::class.java).apply {
+//
+//                        }
+//                        startActivityForResult(intent, 0)
                         val msg = "Photo capture succeeded: ${file.absolutePath}"
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                         Log.d("CameraXApp", msg)
@@ -138,7 +151,7 @@ class CameraActivity : AppCompatActivity() {
             analyzer = LuminosityAnalyzer()
         }
 
-        CameraX.bindToLifecycle(this, preview, imageCapture, analyzerUseCase)
+        CameraX.bindToLifecycle(this, preview, imageCapture)
 
     }
 
@@ -156,7 +169,6 @@ class CameraActivity : AppCompatActivity() {
             else -> return
         }
         matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
-
         viewFinder.setTransform(matrix)
     }
 
@@ -213,9 +225,7 @@ class CameraActivity : AppCompatActivity() {
                 Log.d("CameraXApp", "Average luminosity: $luma")
                 lastAnalyzedTimestamp = currentTimestamp
             }
-
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -225,7 +235,6 @@ class CameraActivity : AppCompatActivity() {
                 val rscId: Int =data?.getIntExtra("resource_id", 0)!!
                 imageView.setImageResource(rscId)
             }
-
         }
     }
 }
