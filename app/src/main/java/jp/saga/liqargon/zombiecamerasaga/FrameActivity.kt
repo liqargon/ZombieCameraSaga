@@ -29,7 +29,8 @@ class FrameActivity : AppCompatActivity() {
                 R.drawable.sakura_3,
                 R.drawable.sakura_4,
                 R.drawable.ai_1,
-                R.drawable.tatsumi_1
+                R.drawable.tatsumi_1,
+                R.drawable.tatsumi_2
                 )
         val ides = (0..11).map { generateViewId() }
 //        val hoge = resources.obtainTypedArray(R.drawable)
