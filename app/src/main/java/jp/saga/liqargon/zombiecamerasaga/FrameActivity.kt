@@ -22,11 +22,20 @@ class FrameActivity : AppCompatActivity() {
         val attr: AttributeSet? = null
 
         // TODO(liqargon): 画像自動取得
-        val resourceIdes:Array<Int> = arrayOf(R.drawable.sakura_1, R.drawable.sakura_2)
+        val resourceIdes:Array<Int> =
+            arrayOf(
+                R.drawable.sakura_1,
+                R.drawable.sakura_2,
+                R.drawable.sakura_3,
+                R.drawable.sakura_4,
+                R.drawable.ai_1,
+                R.drawable.tatsumi_1
+                )
         val ides = (0..11).map { generateViewId() }
+//        val hoge = resources.obtainTypedArray(R.drawable)
 
         for (i in 0..11) {
-            // TODO(liqargon): 3で割れない数に対応, 横画像対応
+            // TODO(liqargon): 2で割れない数に対応, 縦画像対応
             val params: ConstraintLayout.LayoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
                 dimensionRatio = "h,16:9"
                 setMargins(16)
@@ -63,7 +72,7 @@ class FrameActivity : AppCompatActivity() {
             }
 
             val frame: ImageView = ImageView(this, attr).apply {
-                setImageResource(resourceIdes[i%2])
+                setImageResource(resourceIdes[i%resourceIdes.size])
                 setPadding(10)
                 setBackgroundResource(R.drawable.border)
                 id = ides[i]
@@ -73,7 +82,7 @@ class FrameActivity : AppCompatActivity() {
             frame.setOnClickListener {
                 // TODO(liqargon): 選択したフレームをカメラPreviewに表示する機能
                 val intent = Intent()
-                intent.putExtra("resource_id", resourceIdes[i%2])
+                intent.putExtra("resource_id", resourceIdes[i%resourceIdes.size])
                 setResult(Activity.RESULT_OK, intent)
                 finish()
             }

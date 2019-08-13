@@ -165,12 +165,11 @@ class CameraActivity : AppCompatActivity() {
                             e.printStackTrace()
                             throw e
                         }
-//                        val intent = Intent(this, PreviewActivity::class.java).apply{
-//
+//                        val intent = Intent(this@CameraActivity, PreviewActivity::class.java).apply {
+//                            putExtra("capture", btm)
+//                            putExtra("file", file)
 //                        }
-//                        val intent = Intent(this@CameraActivity, FrameActivity::class.java).apply {
 //
-//                        }
 //                        startActivityForResult(intent, 0)
                         val msg = "Photo capture succeeded: ${file.absolutePath}"
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
