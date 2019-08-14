@@ -32,7 +32,7 @@ class FrameActivity : AppCompatActivity() {
                 R.drawable.tatsumi_1,
                 R.drawable.tatsumi_2
             )
-        val sizeFrames: Int = resourceIdes.size % 2 * 2 - 1
+        val sizeFrames: Int = resourceIdes.size / 2 * 2 - 1
         val ides = (0..sizeFrames).map { generateViewId() }
 
         for (i in 0..sizeFrames) {
