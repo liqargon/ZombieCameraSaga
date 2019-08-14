@@ -1,10 +1,10 @@
 package jp.saga.liqargon.zombiecamerasaga
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -12,15 +12,12 @@ import android.graphics.Matrix
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
 import android.util.Rational
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.camera.core.*
@@ -30,9 +27,6 @@ import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.ByteBuffer
-import java.util.concurrent.TimeUnit
-import android.hardware.camera2.params.StreamConfigurationMap as StreamConfigurationMap1
 
 class CameraActivity : AppCompatActivity() {
     companion object {
@@ -40,30 +34,29 @@ class CameraActivity : AppCompatActivity() {
         private const val RESULT_FRAME_SELECT = 502
     }
 
-    private val REQUESTED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-    private val flagFlash = false
+    private val requiredPermissions = arrayOf(Manifest.permission.CAMERA)
 
+    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
-
         viewFinder = findViewById(R.id.view_finder)
 
         // fullscreen mode
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-        } else {
-            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> viewFinder.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN -> viewFinder.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            else -> viewFinder.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
 
         if (allPermissionGranted()) {
             viewFinder.post { startCamera() }
         } else {
             ActivityCompat.requestPermissions(
-                this, REQUESTED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                this, requiredPermissions, REQUEST_CODE_PERMISSIONS
             )
         }
 
@@ -72,16 +65,15 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     override fun onResume() {
         super.onResume()
-
-        // fullscreen mode
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-        } else {
-            viewFinder.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> viewFinder.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN -> viewFinder.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            else -> viewFinder.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
     }
 
@@ -138,26 +130,26 @@ class CameraActivity : AppCompatActivity() {
                         val canvas = Canvas(btm)
 
                         // adjust a bitmap size of captured image in accordance with frame aspect ratio (16:9)
-                        val frame_height: Int = when {
+                        val frameHeight: Int = when {
                             bmb.width / bmb.height >= 16 / 9 -> bmb.height
                             bmb.width / bmb.height == 16 / 9 -> bmb.height
                             bmb.width / bmb.height <= 16 / 9 -> bmb.width * 9 / 16
                             else -> return
                         }
-                        val frame_width: Int = when {
+                        val frameWidth: Int = when {
                             bmb.width / bmb.height >= 16 / 9 -> bmb.height * 16 / 9
                             bmb.width / bmb.height == 16 / 9 -> bmb.width
                             bmb.width / bmb.height <= 16 / 9 -> bmb.width
                             else -> return
                         }
                         canvas.drawBitmap(bmb, 0f, 0f, null)
-                        if (rscId != null){
+                        if (rscId != null) {
                             var bmf: Bitmap = BitmapFactory.decodeResource(resources, rscId!!)
-                            bmf = Bitmap.createScaledBitmap(bmf, frame_width, frame_height, false)
-                            canvas.drawBitmap(bmf, (bmb.width - frame_width) / 2f, (bmb.height - frame_height) / 2f, null)
+                            bmf = Bitmap.createScaledBitmap(bmf, frameWidth, frameHeight, false)
+                            canvas.drawBitmap(bmf, (bmb.width - frameWidth) / 2f, (bmb.height - frameHeight) / 2f, null)
                         }
                         try {
-                            val out: FileOutputStream = FileOutputStream(file)
+                            val out = FileOutputStream(file)
                             btm.compress(Bitmap.CompressFormat.JPEG, 100, out)
                             out.flush()
                             out.close()
@@ -165,27 +157,17 @@ class CameraActivity : AppCompatActivity() {
                             e.printStackTrace()
                             throw e
                         }
+                        // TODO(liqargon): Add preview feature
 //                        val intent = Intent(this@CameraActivity, PreviewActivity::class.java).apply {
 //                            putExtra("capture", btm)
 //                            putExtra("file", file)
 //                        }
-//
 //                        startActivityForResult(intent, 0)
                         val msg = "Photo capture succeeded: ${file.absolutePath}"
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                         Log.d("CameraXApp", msg)
                     }
                 })
-        }
-
-        val analyzerConfig = ImageAnalysisConfig.Builder().apply {
-            val analyzerThread = HandlerThread("LuminosityAnalysis").apply { start() }
-            setCallbackHandler(Handler(analyzerThread.looper))
-            setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
-        }.build()
-
-        val analyzerUseCase = ImageAnalysis(analyzerConfig).apply {
-            analyzer = LuminosityAnalyzer()
         }
 
         CameraX.bindToLifecycle(this, preview, imageCapture)
@@ -228,7 +210,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun allPermissionGranted() = REQUESTED_PERMISSIONS.all {
+    private fun allPermissionGranted() = requiredPermissions.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -243,40 +225,12 @@ class CameraActivity : AppCompatActivity() {
         startActivityForResult(intent, RESULT_FRAME_SELECT)
     }
 
-    fun hoge(view: View) {
-
-    }
-
-    private class LuminosityAnalyzer : ImageAnalysis.Analyzer {
-        private var lastAnalyzedTimestamp = 0L
-
-        private fun ByteBuffer.toByteArray(): ByteArray {
-            rewind()
-            val data = ByteArray(remaining())
-            get(data)
-            return data
-        }
-
-        override fun analyze(image: ImageProxy, rotationDegrees: Int) {
-            val currentTimestamp = System.currentTimeMillis()
-
-            if (currentTimestamp - lastAnalyzedTimestamp >= TimeUnit.SECONDS.toMillis(1)) {
-                val buffer = image.planes[0].buffer
-                val data = buffer.toByteArray()
-                val pixels = data.map { it.toInt() and 0xFF }
-                val luma = pixels.average()
-                Log.d("CameraXApp", "Average luminosity: $luma")
-                lastAnalyzedTimestamp = currentTimestamp
-            }
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RESULT_FRAME_SELECT) {
             if (resultCode == Activity.RESULT_OK) {
                 rscId = data?.getIntExtra("resource_id", 0)!!
-                val mat: Matrix = Matrix()
+                val mat = Matrix()
                 mat.postRotate(90f)
                 var bmp: Bitmap = BitmapFactory.decodeResource(resources, rscId!!)
                 bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, true)
