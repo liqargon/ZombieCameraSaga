@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">ZombieCameraSaga</string>
+    <string name="app_version">Version: v0.0.0a</string>
+    <string name="description">　</string>
+    <string name="notice">Notice</string>
+    <string name="notice_context">
+        本アプリは個人による非公式アプリです。\n
+        公式とは一切の関係はありませんので、公式への問い合わせはご遠慮ください。\n
+        Contact me via Twitter: @zombie_LAr\n
+        \u00A9 2019 Liqargon. Released under the MIT License.
+    </string>
 </resources>

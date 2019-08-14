@@ -15,12 +15,16 @@
             android:theme="@style/AppTheme">
         <activity android:name=".PreviewActivity">
         </activity>
-        <activity android:name=".FrameActivity">
+        <activity android:name=".FrameActivity"
+                  android:theme="@style/Theme.AppCompat.Light.NoTitle"
+        >
         </activity>
         <activity android:name=".CameraActivity"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+                  android:theme="@style/Theme.AppCompat.Light.NoTitle"
+        >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

@@ -73,11 +73,11 @@ class FrameActivity : AppCompatActivity() {
             }
 
             val frame: ImageView = ImageView(this, attr).apply {
+                id = ides[i]
+                layoutParams = params
                 setImageResource(resourceIdes[i % resourceIdes.size])
                 setPadding(10)
                 setBackgroundResource(R.drawable.border)
-                id = ides[i]
-                layoutParams = params
             }
 
             // Behavior of selecting a frame
