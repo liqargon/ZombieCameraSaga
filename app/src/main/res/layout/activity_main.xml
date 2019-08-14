@@ -11,12 +11,14 @@
     <ImageView
             android:id="@+id/logo"
             android:scaleType="fitStart"
-            app:layout_constraintDimensionRatio="h,16:9"
+            app:layout_constraintDimensionRatio="h,16:4"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/tatsumi_1"
+            android:src="@drawable/logo"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             app:layout_constraintEnd_toEndOf="parent"
     />
 
