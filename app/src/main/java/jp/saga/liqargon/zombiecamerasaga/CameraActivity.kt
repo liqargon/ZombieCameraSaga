@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -60,6 +59,7 @@ class CameraActivity : AppCompatActivity() {
             else -> viewFinder.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
 
+        // permissions
         if (allPermissionGranted()) {
             viewFinder.post { startCamera() }
         } else {
@@ -133,7 +133,6 @@ class CameraActivity : AppCompatActivity() {
                     }
 
                     override fun onImageSaved(file: File) {
-                        // TODO(liqargon): combine a taken picture and selected frame.
                         val bmb: Bitmap = BitmapFactory.decodeFile(file.path)
                         val btm: Bitmap = Bitmap.createBitmap(bmb.width, bmb.height, Bitmap.Config.ARGB_8888)
                         val canvas = Canvas(btm)
@@ -152,11 +151,15 @@ class CameraActivity : AppCompatActivity() {
                             else -> return
                         }
                         canvas.drawBitmap(bmb, 0f, 0f, null)
+
+                        // Combine frame
                         if (rscId != null) {
                             var bmf: Bitmap = BitmapFactory.decodeResource(resources, rscId!!)
                             bmf = Bitmap.createScaledBitmap(bmf, frameWidth, frameHeight, false)
                             canvas.drawBitmap(bmf, (bmb.width - frameWidth) / 2f, (bmb.height - frameHeight) / 2f, null)
                         }
+
+                        // Save a processed image again
                         try {
                             val out = FileOutputStream(file)
                             btm.compress(Bitmap.CompressFormat.JPEG, 100, out)
@@ -166,6 +169,7 @@ class CameraActivity : AppCompatActivity() {
                             e.printStackTrace()
                             throw e
                         }
+
                         // TODO(liqargon): Add preview feature
 //                        val intent = Intent(this@CameraActivity, PreviewActivity::class.java).apply {
 //                            putExtra("capture", btm)
@@ -181,6 +185,8 @@ class CameraActivity : AppCompatActivity() {
                         contentResolver.insert(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
                         )
+
+                        // Message
                         val msg = "Photo capture succeeded: ${file.absolutePath}"
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                         Log.d("CameraXApp", msg)
@@ -189,7 +195,6 @@ class CameraActivity : AppCompatActivity() {
         }
 
         CameraX.bindToLifecycle(this, preview, imageCapture)
-
     }
 
     private fun updateTransform() {

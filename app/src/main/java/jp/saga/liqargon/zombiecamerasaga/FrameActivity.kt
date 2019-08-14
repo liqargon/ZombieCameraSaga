@@ -70,7 +70,6 @@ class FrameActivity : AppCompatActivity() {
                         }
                     }
                 }
-
             }
 
             val frame: ImageView = ImageView(this, attr).apply {
