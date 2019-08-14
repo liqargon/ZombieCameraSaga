@@ -3,6 +3,8 @@ package jp.saga.liqargon.zombiecamerasaga
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -12,6 +14,8 @@ import android.graphics.Matrix
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.util.Rational
 import android.view.Surface
@@ -34,7 +38,11 @@ class CameraActivity : AppCompatActivity() {
         private const val RESULT_FRAME_SELECT = 502
     }
 
-    private val requiredPermissions = arrayOf(Manifest.permission.CAMERA)
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,9 +115,10 @@ class CameraActivity : AppCompatActivity() {
         val imageCapture = ImageCapture(imageCaptureConfig)
         findViewById<ImageView>(R.id.capture_button).setOnClickListener {
             val file = File(
-                externalMediaDirs.first(),
+                getExternalFilesDir(Environment.DIRECTORY_DCIM),
                 "${System.currentTimeMillis()}.jpg"
             )
+
             imageCapture.takePicture(file,
                 object : ImageCapture.OnImageSavedListener {
                     override fun onError(
@@ -163,6 +172,15 @@ class CameraActivity : AppCompatActivity() {
 //                            putExtra("file", file)
 //                        }
 //                        startActivityForResult(intent, 0)
+
+                        // Add a captured photo to the gallery
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                            put("_data", file.absolutePath)
+                        }
+                        contentResolver.insert(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
+                        )
                         val msg = "Photo capture succeeded: ${file.absolutePath}"
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                         Log.d("CameraXApp", msg)
