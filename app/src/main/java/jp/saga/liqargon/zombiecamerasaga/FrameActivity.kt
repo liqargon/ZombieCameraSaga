@@ -28,9 +28,18 @@ class FrameActivity : AppCompatActivity() {
                 R.drawable.sakura_2,
                 R.drawable.sakura_3,
                 R.drawable.sakura_4,
+                R.drawable.sakura_5,
+                R.drawable.taesaku_1,
                 R.drawable.ai_1,
+                R.drawable.ai_2,
+                R.drawable.ai_3,
+                R.drawable.junko_1,
+                R.drawable.junai_1,
+                R.drawable.lily_1,
+                R.drawable.lily_2,
                 R.drawable.tatsumi_1,
-                R.drawable.tatsumi_2
+                R.drawable.tatsumi_3,
+                R.drawable.tatsumi_4
             )
         val sizeFrames: Int = resourceIdes.size / 2 * 2 - 1
         val ides = (0..sizeFrames).map { generateViewId() }
