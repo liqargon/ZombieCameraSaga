@@ -33,6 +33,7 @@ class FrameActivity : AppCompatActivity() {
                 R.drawable.ai_1,
                 R.drawable.ai_2,
                 R.drawable.ai_3,
+                R.drawable.ai_4,
                 R.drawable.junko_1,
                 R.drawable.junai_1,
                 R.drawable.lily_1,
