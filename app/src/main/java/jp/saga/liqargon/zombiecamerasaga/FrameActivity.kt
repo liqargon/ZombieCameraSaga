@@ -36,6 +36,8 @@ class FrameActivity : AppCompatActivity() {
                 R.drawable.ai_4,
                 R.drawable.junko_1,
                 R.drawable.junai_1,
+                R.drawable.enshu_1,
+                R.drawable.saki,
                 R.drawable.lily_1,
                 R.drawable.lily_2,
                 R.drawable.tatsumi_1,
