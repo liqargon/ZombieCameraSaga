@@ -21,51 +21,14 @@ class FrameActivity : AppCompatActivity() {
         val cLayout: ConstraintLayout = findViewById(R.id.frame_view)
         val attr: AttributeSet? = null
 
-        // TODO(liqargon): 画像自動取得
-        val resourceIdes: Array<Int> =
-            arrayOf(
-                R.drawable.hako_1,
-                R.drawable.hako_2,
-                R.drawable.hako_3,
-                R.drawable.hako_4,
-                R.drawable.hako_5,
-                R.drawable.hako_6,
-                R.drawable.sakura_1,
-                R.drawable.sakura_2,
-                R.drawable.sakura_3,
-                R.drawable.sakura_4,
-                R.drawable.sakura_5,
-                R.drawable.sakura_6,
-                R.drawable.sakura_7,
-                R.drawable.sakura_8,
-                R.drawable.sakura_9,
-                R.drawable.sakura_10,
-                R.drawable.sakura_11,
-                R.drawable.sakura_12,
-                R.drawable.taesaku_1,
-                R.drawable.ai_1,
-                R.drawable.ai_2,
-                R.drawable.ai_3,
-                R.drawable.ai_4,
-                R.drawable.ai_5,
-                R.drawable.ai_6,
-                R.drawable.junko_1,
-                R.drawable.junko_2,
-                R.drawable.junai_1,
-                R.drawable.enshu_1,
-                R.drawable.enshu_2,
-                R.drawable.saki,
-                R.drawable.lily_1,
-                R.drawable.lily_2,
-                R.drawable.sakilily_1,
-                R.drawable.sakujun_1,
-                R.drawable.tatsumi_1,
-                R.drawable.tatsumi_3,
-                R.drawable.tatsumi_4
-            )
+        val regex = """^frame""".toRegex()
+        val resourceIdes = R.drawable::class.java.fields.filter {
+            regex.containsMatchIn(resources.getResourceEntryName(it.getInt(null)))
+        }.map {
+            it.getInt(null)
+        }
         val sizeFrames: Int = resourceIdes.size / 2 * 2 - 1
         val ides = (0..sizeFrames).map { generateViewId() }
-
         for (i in 0..sizeFrames) {
             // TODO(liqargon): 2で割れない数に対応, 縦画像対応
             // arrange frames in two rows

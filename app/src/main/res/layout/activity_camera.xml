@@ -43,7 +43,7 @@
             android:layout_height="50dp"
             android:background="@color/colorPrimary"
             android:alpha="0.7"
-            app:srcCompat="@drawable/frame_button"
+            app:srcCompat="@drawable/f_button"
             android:id="@+id/imageButton2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
